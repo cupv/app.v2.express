@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql
+    container_name: app.api.db
+    restart: always
+    ports:
+      - '3306:3306'
+    volumes:
+      - /var/lib/custom:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: abcde12345-
+networks:
+  default:
+    external:
+      name: app.api.net
