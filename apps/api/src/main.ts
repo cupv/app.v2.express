@@ -1,10 +1,7 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
 import express from 'express';
+import { graphqlHTTP } from 'express-graphql';
 import * as path from 'path';
+import { schema } from './graphql/schemas';
 
 const app = express();
 
@@ -13,6 +10,14 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.get('/api', (req, res) => {
   res.send({ message: 'Welcome to api!' });
 });
+
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema,
+    graphiql: true,
+  })
+);
 
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
