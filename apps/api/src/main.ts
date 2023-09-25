@@ -1,8 +1,9 @@
-import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
+import express, { json } from 'express';
 import * as path from 'path';
-import { schema } from './graphql/schemas';
-
+import cors from 'cors';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { schema } from './graphql/schema';
 const app = express();
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
@@ -11,16 +12,33 @@ app.get('/api', (req, res) => {
   res.send({ message: 'Welcome to api!' });
 });
 
-app.use(
-  '/graphql',
-  graphqlHTTP({
-    schema,
-    graphiql: true,
-  })
-);
+const typeDefs = `
+  type Query {
+    hello: String
+  }
+`;
 
-const port = process.env.PORT || 3333;
-const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}/api`);
+const resolvers = {
+  Query: {
+    hello: () => 'Hello world!'
+  },
+};
+
+// const schema = makeExecutableSchema({
+// });
+
+
+const apolloServer = new ApolloServer({
+  schema,
 });
-server.on('error', console.error);
+
+apolloServer.start().then(()=>{
+  app.use('/graphql', cors(), json(), expressMiddleware(apolloServer));
+  const port = process.env.PORT || 3333;
+  const server = app.listen(port, () => {
+    console.log(`Listening at http://localhost:${port}/api`);
+  });
+  server.on('error', console.error);
+});
+
+
